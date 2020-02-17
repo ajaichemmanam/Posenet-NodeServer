@@ -12,11 +12,10 @@
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs-converter": "^1.5.2",
     "@tensorflow/tfjs-core": "^1.5.2",
-    "@tensorflow/tfjs-node": "^1.5.2",
+    "@tensorflow/tfjs-node-gpu": "^1.5.2",
     "canvas": "^2.6.1",
     "express": "^4.17.1",
     "mime-types": "^2.1.26",
-    "multer": "^1.4.2",
-    "worker-farm": "^1.7.0"
+    "multer": "^1.4.2"
   }
 }
