@@ -1,0 +1,22 @@
+{
+  "name": "posenet-server",
+  "version": "1.0.0",
+  "description": "This is a express server to upload images and run posenet model on them.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ajai John Chemmanam",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow-models/posenet": "^2.2.1",
+    "@tensorflow/tfjs-converter": "^1.5.2",
+    "@tensorflow/tfjs-core": "^1.5.2",
+    "@tensorflow/tfjs-node": "^1.5.2",
+    "canvas": "^2.6.1",
+    "express": "^4.17.1",
+    "mime-types": "^2.1.26",
+    "multer": "^1.4.2",
+    "worker-farm": "^1.7.0"
+  }
+}
