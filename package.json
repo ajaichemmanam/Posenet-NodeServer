@@ -4,7 +4,7 @@
   "description": "This is a express server to upload images and run posenet model on them.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Ajai John Chemmanam",
   "license": "MIT",
