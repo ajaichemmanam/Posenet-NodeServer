@@ -181,9 +181,11 @@ router.post("/images/upload", (req, res) => {
       if (err) {
         res.status(400).json({ message: err.message });
       } else {
+        isSinglePose = (req.body.isSingle === 'true');
+        console.log(isSinglePose)
         let path = `/images/${req.file.originalname}`;
         let imagepath = __dirname + `/images/${req.file.filename}`;
-        estimatePoseOnImage(imagepath, __dirname + path, (isSingle = false));
+        estimatePoseOnImage(imagepath, __dirname + path, (isSingle = isSinglePose));
         res.status(200).json({
           message: "Image Uploaded Successfully ! See Callback Path",
           path: path
