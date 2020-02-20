@@ -8,14 +8,13 @@ This is a node express server used to upload images and run posenet model on the
 - Open a terminal and run `npm install`
 - Run `node index.js` in terminal
 
-- Upload an image to `localhost:8080/images/upload` as POST request with form-data: key = 'image' value = file
+- Upload an image to `localhost:8080/images/upload` as POST request with form-data: key = 'image' value = file & key='isSingle' value= true
 - The server returns a callback in response
 
 ```
-{
-    "message": "Image Uploaded Successfully ! See Callback Path",
-    "path": "/images/filename.jpeg"
-}
+    "message": "Processed Image",
+    "path": "/images/download.jpeg",
+    "poses": "[]"
 ```
 
 - Go to localhost:8080/images/filename.jpeg to see the results.
