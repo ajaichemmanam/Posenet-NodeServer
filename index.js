@@ -105,35 +105,16 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(image, 0, 0);
   const input = tf.browser.fromPixels(canvas);
-  var poses = 0;
+  var poses = [];
   if (isSingle) {
-    poses = await net.estimateSinglePose(
-      input,
-      imageScaleFactor,
-      flipHorizontal,
-      outputStride
-    );
-
-    console.log(poses);
-    if (poses != 0) {
-      if (poses.score >= minPoseConfidence) {
-        console.log("drawing keypoints");
-        utils.drawKeyPoints(
-          poses.keypoints,
-          minPartConfidence,
-          skeletonColor,
-          ctx
-        );
-        console.log("drawing skeleton");
-        utils.drawSkeleton(
-          poses.keypoints,
-          minPartConfidence,
-          skeletonColor,
-          skeletonLineWidth,
-          ctx
-        );
-      }
-    }
+    poses = [
+      await net.estimateSinglePose(
+        input,
+        imageScaleFactor,
+        flipHorizontal,
+        outputStride
+      )
+    ];
   } else {
     poses = await net.estimateMultiplePoses(
       input,
@@ -142,7 +123,9 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
       outputStride,
       5 // maxPoseDetections
     );
-
+  }
+  console.log(poses);
+  if (poses.length != 0) {
     poses.forEach(({ score, keypoints }) => {
       // console.log(score, keypoints)
       if (score >= minPoseConfidence) {
@@ -181,14 +164,21 @@ router.post("/images/upload", (req, res) => {
       if (err) {
         res.status(400).json({ message: err.message });
       } else {
-        isSinglePose = (req.body.isSingle === 'true');
-        console.log(isSinglePose)
+        isSinglePose = req.body.isSingle === "true";
+        console.log(isSinglePose);
         let path = `/images/${req.file.originalname}`;
         let imagepath = __dirname + `/images/${req.file.filename}`;
-        estimatePoseOnImage(imagepath, __dirname + path, (isSingle = isSinglePose));
-        res.status(200).json({
-          message: "Image Uploaded Successfully ! See Callback Path",
-          path: path
+        estimatePoseOnImage(
+          imagepath,
+          __dirname + path,
+          (isSingle = isSinglePose)
+        ).then(poses => {
+          // console.log(poses);
+          res.status(200).json({
+            message: "Processed Image",
+            path: path,
+            poses: JSON.stringify(poses)
+          });
         });
       }
     });
