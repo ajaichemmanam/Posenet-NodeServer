@@ -26,6 +26,29 @@ const imageScaleFactor = 0.5;
 const outputStride = 16;
 const flipHorizontal = false;
 
+config = {
+  architecture: "ResNet50",
+  outputStride: 32,
+  inputResolution: 257,
+  multiplier: 1.0,
+  quantBytes: 4
+};
+
+var net = 0;
+
+loadModel(config)
+  .then(model => {
+    console.log("Loaded Model");
+    net = model;
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
+async function loadModel(config) {
+  // load the posenet model from a checkpoint
+  return await posenet.load(config);
+}
 
 async function loadImage(path) {
   let image = new Image();
@@ -75,41 +98,66 @@ let upload = multer({
 //   }
 // }).single("image");
 
-async function estimatePoseOnImage(filePath, outputFilePath) {
-  // load the posenet model from a checkpoint
-  const net = await posenet.load({
-    architecture: "ResNet50",
-    outputStride: 32,
-    inputResolution: 257,
-    multiplier: 1.0,
-    quantBytes: 4
-  });
-
+async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
   image = await loadImage(filePath);
 
   const canvas = createCanvas(image.width, image.height);
   const ctx = canvas.getContext("2d");
   ctx.drawImage(image, 0, 0);
   const input = tf.browser.fromPixels(canvas);
-  const poses = await net.estimateSinglePose(
-    input,
-    imageScaleFactor,
-    flipHorizontal,
-    outputStride
-  );
-
-  console.log(poses);
-  if (poses.score >= minPoseConfidence) {
-    console.log("drawing keypoints");
-    utils.drawKeyPoints(poses.keypoints, minPartConfidence, skeletonColor, ctx);
-    console.log("drawing skeleton");
-    utils.drawSkeleton(
-      poses.keypoints,
-      minPartConfidence,
-      skeletonColor,
-      skeletonLineWidth,
-      ctx
+  var poses = 0;
+  if (isSingle) {
+    poses = await net.estimateSinglePose(
+      input,
+      imageScaleFactor,
+      flipHorizontal,
+      outputStride
     );
+
+    console.log(poses);
+    if (poses != 0) {
+      if (poses.score >= minPoseConfidence) {
+        console.log("drawing keypoints");
+        utils.drawKeyPoints(
+          poses.keypoints,
+          minPartConfidence,
+          skeletonColor,
+          ctx
+        );
+        console.log("drawing skeleton");
+        utils.drawSkeleton(
+          poses.keypoints,
+          minPartConfidence,
+          skeletonColor,
+          skeletonLineWidth,
+          ctx
+        );
+      }
+    }
+  } else {
+    poses = await net.estimateMultiplePoses(
+      input,
+      imageScaleFactor,
+      flipHorizontal,
+      outputStride,
+      5 // maxPoseDetections
+    );
+
+    poses.forEach(({ score, keypoints }) => {
+      // console.log(score, keypoints)
+      if (score >= minPoseConfidence) {
+        console.log("drawing keypoints");
+        utils.drawKeyPoints(keypoints, minPartConfidence, skeletonColor, ctx);
+        console.log("drawing skeleton");
+        utils.drawSkeleton(
+          keypoints,
+          minPartConfidence,
+          skeletonColor,
+          skeletonLineWidth,
+          ctx
+        );
+      }
+    });
   }
 
   var dataUrl = canvas.toDataURL("image/png");
@@ -123,19 +171,25 @@ async function estimatePoseOnImage(filePath, outputFilePath) {
 }
 
 router.post("/images/upload", (req, res) => {
-  upload(req, res, function(err) {
-    if (err) {
-      res.status(400).json({ message: err.message });
-    } else {
-      let path = `/images/${req.file.originalname}`;
-      let imagepath = __dirname + `/images/${req.file.filename}`;
-        estimatePoseOnImage(imagepath, __dirname + path);
-      res.status(200).json({
-        message: "Image Uploaded Successfully ! See Callback Path",
-        path: path
-      });
-    }
-  });
+  if (net == 0) {
+    res.status(201).json({
+      message: "Loading Model. Please try later"
+    });
+  } else {
+    upload(req, res, function(err) {
+      if (err) {
+        res.status(400).json({ message: err.message });
+      } else {
+        let path = `/images/${req.file.originalname}`;
+        let imagepath = __dirname + `/images/${req.file.filename}`;
+        estimatePoseOnImage(imagepath, __dirname + path, (isSingle = false));
+        res.status(200).json({
+          message: "Image Uploaded Successfully ! See Callback Path",
+          path: path
+        });
+      }
+    });
+  }
 });
 
 router.get("/images/:imagename", (req, res) => {
