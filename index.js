@@ -1,7 +1,7 @@
 // // npm i @tensorflow/tfjs-node
 // const tf = require("@tensorflow/tfjs-node");
 // // npm i @tensorflow/tfjs-node-gpu
-// // require('@tensorflow/tfjs-node-gpu');
+const tf = require('@tensorflow/tfjs-node-gpu');
 const posenet = require("@tensorflow-models/posenet");
 
 const utils = require("./utils.js");
