@@ -65,4 +65,18 @@ function drawSkeleton(
   });
 }
 
-module.exports = { drawKeyPoints, drawSkeleton };
+function drawBoundingBox(keypoints, color, ctx) {
+  const boundingBox = posenet.getBoundingBox(keypoints);
+
+  ctx.rect(
+    boundingBox.minX,
+    boundingBox.minY,
+    boundingBox.maxX - boundingBox.minX,
+    boundingBox.maxY - boundingBox.minY
+  );
+
+  ctx.strokeStyle = color;
+  ctx.stroke();
+}
+
+module.exports = { drawKeyPoints, drawSkeleton, drawBoundingBox };
