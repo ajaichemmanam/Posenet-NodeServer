@@ -156,6 +156,7 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
           skeletonLineWidth,
           ctx
         );
+        // utils.drawBoundingBox(keypoints, skeletonColor, ctx);
       }
     });
   }
