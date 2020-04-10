@@ -31,17 +31,17 @@ config = {
   outputStride: 32,
   inputResolution: 257,
   multiplier: 1.0,
-  quantBytes: 4
+  quantBytes: 4,
 };
 
 var net = 0;
 
 loadModel(config)
-  .then(model => {
+  .then((model) => {
     console.log("Loaded Model");
     net = model;
   })
-  .catch(err => {
+  .catch((err) => {
     console.log(err);
   });
 
@@ -63,12 +63,12 @@ async function loadImage(path) {
 }
 
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     cb(null, "images/");
   },
   filename: (req, file, cb) => {
     return cb(null, Date.now() + "-" + file.originalname);
-  }
+  },
 });
 
 let upload = multer({
@@ -83,7 +83,7 @@ let upload = multer({
     }
 
     callback(null, true);
-  }
+  },
 }).single("image");
 
 // const upload = multer({
@@ -113,7 +113,7 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
         imageScaleFactor,
         flipHorizontal,
         outputStride
-      )
+      ),
     ];
   } else {
     poses = await net.estimateMultiplePoses(
@@ -130,16 +130,23 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
       // console.log(score, keypoints)
       if (score >= minPoseConfidence) {
         console.log("drawing keypoints");
-        utils.drawKeyPoints(keypoints, minPartConfidence, skeletonColor, ctx);
+        utils.drawKeyPoints(
+          keypoints,
+          minPartConfidence,
+          skeletonColor,
+          ctx,
+          imageScaleFactor
+        );
         console.log("drawing skeleton");
         utils.drawSkeleton(
           keypoints,
           minPartConfidence,
           skeletonColor,
           skeletonLineWidth,
-          ctx
+          ctx,
+          imageScaleFactor
         );
-        // utils.drawBoundingBox(keypoints, skeletonColor, ctx);
+        utils.drawBoundingBox(keypoints, skeletonColor, ctx, imageScaleFactor);
       }
     });
   }
@@ -148,7 +155,7 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
   //   console.log(dataUrl);
   var base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
 
-  require("fs").writeFile(outputFilePath, base64Data, "base64", function(err) {
+  require("fs").writeFile(outputFilePath, base64Data, "base64", function (err) {
     // console.log(err);
   });
   return poses;
@@ -157,10 +164,10 @@ async function estimatePoseOnImage(filePath, outputFilePath, isSingle = true) {
 router.post("/images/upload", (req, res) => {
   if (net == 0) {
     res.status(201).json({
-      message: "Loading Model. Please try later"
+      message: "Loading Model. Please try later",
     });
   } else {
-    upload(req, res, function(err) {
+    upload(req, res, function (err) {
       if (err) {
         res.status(400).json({ message: err.message });
       } else {
@@ -172,12 +179,12 @@ router.post("/images/upload", (req, res) => {
           imagepath,
           __dirname + path,
           (isSingle = isSinglePose)
-        ).then(poses => {
+        ).then((poses) => {
           // console.log(poses);
           res.status(200).json({
             message: "Processed Image",
             path: path,
-            poses: JSON.stringify(poses)
+            poses: JSON.stringify(poses),
           });
         });
       }
