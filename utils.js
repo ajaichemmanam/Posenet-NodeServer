@@ -13,7 +13,7 @@ function drawKeyPoints(
   canvasContext,
   scale = 1
 ) {
-  keypoints.forEach(keypoint => {
+  keypoints.forEach((keypoint) => {
     if (keypoint.score >= minConfidence) {
       const { x, y } = keypoint.position;
       canvasContext.beginPath();
@@ -53,7 +53,7 @@ function drawSkeleton(
     minConfidence
   );
 
-  adjacentKeyPoints.forEach(keypoints => {
+  adjacentKeyPoints.forEach((keypoints) => {
     drawSegment(
       toTuple(keypoints[0].position),
       toTuple(keypoints[1].position),
@@ -65,14 +65,14 @@ function drawSkeleton(
   });
 }
 
-function drawBoundingBox(keypoints, color, ctx) {
+function drawBoundingBox(keypoints, color, ctx, scale = 1) {
   const boundingBox = posenet.getBoundingBox(keypoints);
 
   ctx.rect(
-    boundingBox.minX,
-    boundingBox.minY,
-    boundingBox.maxX - boundingBox.minX,
-    boundingBox.maxY - boundingBox.minY
+    boundingBox.minX * scale,
+    boundingBox.minY * scale,
+    (boundingBox.maxX - boundingBox.minX) * scale,
+    (boundingBox.maxY - boundingBox.minY) * scale
   );
 
   ctx.strokeStyle = color;
