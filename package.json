@@ -12,8 +12,8 @@
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs-converter": "^1.5.2",
     "@tensorflow/tfjs-core": "^1.5.2",
-    "@tensorflow/tfjs-node-gpu": "^1.5.2",
-    "canvas": "^2.6.1",
+    "@tensorflow/tfjs-node-gpu": "^4.8.0",
+    "canvas": "^2.11.2",
     "express": "^4.17.3",
     "mime-types": "^2.1.26",
     "multer": "^1.4.2"
